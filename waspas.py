@@ -91,7 +91,7 @@ def generate_pdf(df_result, winners):
     elements.append(Spacer(1, 12))
 
     # Pemenang
-    winner_text = "<b>Karyawan dengan nilai terbaik (Gaji 100%):</b><br/>" + "<br/>".join([f"- {w}" for w in winners])
+    winner_text = "<b>Karyawan dengan nilai terbaik (Bonus 100%):</b><br/>" + "<br/>".join([f"- {w}" for w in winners])
     elements.append(Paragraph(winner_text, styles["Normal"]))
     elements.append(Spacer(1, 12))
 
@@ -178,7 +178,11 @@ df = pd.DataFrame(data, index=kriteria_names).T
 st.write("### 📊 Matriks Keputusan")
 st.dataframe(df)
 
-lamb = st.slider("Nilai λ (Lambda)", min_value=0.0, max_value=1.0, value=0.5, step=0.05)
+# ============================================================
+# Lambda Fixed = 0.50
+# ============================================================
+lamb = 0.5
+st.info("Nilai λ (Lambda) telah ditetapkan secara default: **0.50**")
 
 
 # ============================================================
