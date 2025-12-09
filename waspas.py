@@ -12,6 +12,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 st.set_page_config(page_title="SPK WASPAS", layout="wide")
 st.title("🔎 Sistem Pendukung Keputusan Penentuan Bonus Akhir Tahun Outward Bound Indonesia - Metode WASPAS")
+st.subheader("Kelompok 3")
 
 # ============================================================
 # Fungsi Penghitungan WASPAS
