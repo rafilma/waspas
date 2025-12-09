@@ -142,7 +142,7 @@ st.dataframe(df)
 # -----------------------------
 # Tombol Proses
 # -----------------------------
-if st.button("🚀 Proses WASPAS"):
+if st.button("🚀 Hitung WASPAS"):
     result = waspas(df, weights, impacts, lamb)
     st.subheader("🏆 Hasil Perhitungan WASPAS")
     st.dataframe(result)
