@@ -183,7 +183,7 @@ if st.button("🚀 Hitung WASPAS"):
     winners = result[result["Rank"] == 1].index.tolist()
 
     if len(winners) == 1:
-        st.success(f"Alternatif terbaik adalah **{winners[0]}**.")
+        st.success(f"Karyawan yang berhak mendapakatkan bonus adalah **{winners[0]}**.")
     else:
         st.success("🔥 Terdapat lebih dari satu alternatif terbaik (Rank 1):")
         for w in winners:
