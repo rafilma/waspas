@@ -182,8 +182,6 @@ st.dataframe(df)
 # Lambda Fixed = 0.50
 # ============================================================
 lamb = 0.5
-st.info("Nilai λ (Lambda) telah ditetapkan secara default: **0.50**")
-
 
 # ============================================================
 # Tombol Hitung
