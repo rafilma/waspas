@@ -12,7 +12,7 @@ import pandas as pd
 import numpy as np
 
 st.set_page_config(page_title="SPK WASPAS", layout="wide")
-st.title("🔎 Sistem Pendukung Keputusan - Metode WASPAS")
+st.title("🔎 Sistem Pendukung Keputusan Penentuan Bonus Akhir Tahun Outward Bound Indonesia - Metode WASPAS")
 
 # -----------------------------
 # Fungsi WASPAS
