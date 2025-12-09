@@ -14,7 +14,7 @@ st.set_page_config(page_title="SPK WASPAS", layout="wide")
 st.title("🔎 Sistem Pendukung Keputusan Penentuan Bonus Akhir Tahun Outward Bound Indonesia - Metode WASPAS")
 
 # ============================================================
-# Fungsi WASPAS
+# Fungsi Penghitungan WASPAS
 # ============================================================
 def waspas(df_values, weights, impacts, lamb=0.5):
     X = df_values.copy().astype(float)
@@ -56,13 +56,28 @@ def waspas(df_values, weights, impacts, lamb=0.5):
         'Q_WASPAS': Q
     }, index=df_values.index)
 
+    # Rank
     result["Rank"] = result["Q_WASPAS"].rank(ascending=False, method="min").astype(int)
+
+    # === Tambahkan Bonus Berdasarkan Nilai Q ===
+    bonus_list = []
+    for val in result["Q_WASPAS"]:
+        if val >= 0.90:
+            bonus_list.append("100%")
+        elif val >= 0.80:
+            bonus_list.append("80%")
+        elif val >= 0.60:
+            bonus_list.append("60%")
+        else:
+            bonus_list.append("50%")
+
+    result["Bonus"] = bonus_list
 
     return result.sort_values("Rank")
 
 
 # ============================================================
-# Fungsi Generate PDF menggunakan ReportLab (platypus)
+# Fungsi Generate PDF
 # ============================================================
 def generate_pdf(df_result, winners):
     buffer = BytesIO()
@@ -75,12 +90,12 @@ def generate_pdf(df_result, winners):
     elements.append(Spacer(1, 12))
 
     # Pemenang
-    winner_text = "<b>Karyawan yang berhak mendapatkan bonus akhir tahun (Rank 1):</b><br/>" + "<br/>".join([f"- {w}" for w in winners])
+    winner_text = "<b>Karyawan dengan nilai terbaik (Rank 1):</b><br/>" + "<br/>".join([f"- {w}" for w in winners])
     elements.append(Paragraph(winner_text, styles["Normal"]))
     elements.append(Spacer(1, 12))
 
     # Tabel hasil
-    table_data = [ ["Alternatif"] + df_result.columns.tolist() ]
+    table_data = [["Alternatif"] + df_result.columns.tolist()]
     for idx, row in df_result.iterrows():
         table_data.append([idx] + list(row.values))
 
@@ -158,7 +173,6 @@ for a in range(jml_alternatif):
 
     data[alt_name] = nilai_alt
 
-# Tampilkan matriks
 df = pd.DataFrame(data, index=kriteria_names).T
 st.write("### 📊 Matriks Keputusan")
 st.dataframe(df)
@@ -171,7 +185,7 @@ lamb = st.slider("Nilai λ (Lambda)", min_value=0.0, max_value=1.0, value=0.5, s
 
 
 # ============================================================
-# Tombol Hitung WASPAS
+# Tombol Hitung
 # ============================================================
 if st.button("🚀 Hitung WASPAS"):
     result = waspas(df, weights, impacts, lamb)
@@ -179,21 +193,15 @@ if st.button("🚀 Hitung WASPAS"):
     st.subheader("🏆 Hasil Perhitungan WASPAS")
     st.dataframe(result)
 
-    # Ambil pemenang (rank 1)
     winners = result[result["Rank"] == 1].index.tolist()
 
-    if len(winners) == 1:
-        st.success(f"Karyawan yang berhak mendapakatkan bonus adalah **{winners[0]}**.")
-    else:
-        st.success("🔥 Karyawan yang berhak mendapakatkan bonus adalah:")
-        for w in winners:
-            st.write(f"- **{w}**")
+    st.success("Hasil perhitungan bonus berdasarkan nilai Q_WASPAS telah ditampilkan pada tabel.")
 
-    # === Generate PDF ===
+    # === PDF ===
     pdf_file = generate_pdf(result, winners)
 
     st.download_button(
-        label="📄 Download Hasil dalam PDF",
+        label="📄 Download PDF",
         data=pdf_file,
         file_name="hasil_waspas.pdf",
         mime="application/pdf"
