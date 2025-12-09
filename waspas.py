@@ -178,6 +178,7 @@ df = pd.DataFrame(data, index=kriteria_names).T
 st.write("### 📊 Matriks Keputusan")
 st.dataframe(df)
 
+lamb = st.slider("Nilai λ (Lambda)", min_value=0.0, max_value=1.0, value=0.5, step=0.05)
 
 
 # ============================================================
