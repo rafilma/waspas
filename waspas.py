@@ -75,7 +75,7 @@ def generate_pdf(df_result, winners):
     elements.append(Spacer(1, 12))
 
     # Pemenang
-    winner_text = "<b>Pemenang (Rank 1):</b><br/>" + "<br/>".join([f"- {w}" for w in winners])
+    winner_text = "<b>Karyawan yang berhak mendapatkan bonus akhir tahun (Rank 1):</b><br/>" + "<br/>".join([f"- {w}" for w in winners])
     elements.append(Paragraph(winner_text, styles["Normal"]))
     elements.append(Spacer(1, 12))
 
@@ -185,7 +185,7 @@ if st.button("🚀 Hitung WASPAS"):
     if len(winners) == 1:
         st.success(f"Karyawan yang berhak mendapakatkan bonus adalah **{winners[0]}**.")
     else:
-        st.success("🔥 Terdapat lebih dari satu alternatif terbaik (Rank 1):")
+        st.success("🔥 Karyawan yang berhak mendapakatkan bonus adalah:")
         for w in winners:
             st.write(f"- **{w}**")
 
