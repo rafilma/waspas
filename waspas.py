@@ -21,7 +21,6 @@ def waspas(df_values, weights, impacts, lamb=0.5):
     X = df_values.copy().astype(float)
     m, n = X.shape
 
-    # Normalisasi bobot
     w = np.array(weights, dtype=float)
     if not np.isclose(w.sum(), 1.0):
         w = w / w.sum()
@@ -48,7 +47,7 @@ def waspas(df_values, weights, impacts, lamb=0.5):
         for j in range(n):
             Q2[i] *= R[i, j] ** w[j]
 
-    # WASPAS
+    # WASPAS final
     Q = lamb * Q1 + (1 - lamb) * Q2
 
     result = pd.DataFrame({
@@ -57,10 +56,9 @@ def waspas(df_values, weights, impacts, lamb=0.5):
         'Q_WASPAS': Q
     }, index=df_values.index)
 
-    # Rank
     result["Rank"] = result["Q_WASPAS"].rank(ascending=False, method="min").astype(int)
 
-    # === Tambahkan Bonus Berdasarkan Nilai Q ===
+    # Hitung Bonus
     bonus_list = []
     for val in result["Q_WASPAS"]:
         if val >= 0.90:
@@ -75,7 +73,6 @@ def waspas(df_values, weights, impacts, lamb=0.5):
     result["Bonus"] = bonus_list
 
     return result.sort_values("Rank")
-
 
 # ============================================================
 # Fungsi Generate PDF
@@ -103,7 +100,6 @@ def generate_pdf(df_result, winners):
     table = Table(table_data, repeatRows=1)
     table.setStyle(TableStyle([
         ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),
-        ("TEXTCOLOR", (0,0), (-1,0), colors.black),
         ("GRID", (0,0), (-1,-1), 0.8, colors.black),
         ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
         ("ALIGN", (1,1), (-1,-1), "CENTER"),
@@ -115,76 +111,67 @@ def generate_pdf(df_result, winners):
     buffer.close()
     return pdf_value
 
-
 # ============================================================
-# Input Jumlah Kriteria & Alternatif
+# SIDEBAR INPUT
 # ============================================================
-st.subheader("⚙️ Input Parameter SPK")
+st.sidebar.header("⚙️ Pengaturan SPK WASPAS")
 
-col1, col2 = st.columns(2)
-with col1:
-    jml_kriteria = st.number_input("Jumlah Kriteria", min_value=1, max_value=20, value=3)
-with col2:
-    jml_alternatif = st.number_input("Jumlah Alternatif", min_value=1, max_value=50, value=3)
+# ─────────────────────────────────────────────
+# Input jumlah kriteria & alternatif
+# ─────────────────────────────────────────────
+jml_kriteria = st.sidebar.number_input("Jumlah Kriteria", min_value=1, max_value=20, value=3)
+jml_alternatif = st.sidebar.number_input("Jumlah Alternatif", min_value=1, max_value=50, value=3)
 
-
-# ============================================================
+# ─────────────────────────────────────────────
 # Input Kriteria
-# ============================================================
-st.subheader("📌 Input Kriteria")
+# ─────────────────────────────────────────────
+st.sidebar.subheader("📌 Input Kriteria")
 
 kriteria_names = []
 weights = []
 impacts = []
 
 for i in range(jml_kriteria):
-    c1, c2, c3 = st.columns(3)
-
-    with c1:
-        nama = st.text_input(f"Nama Kriteria {i+1}", value=f"C{i+1}")
-    with c2:
-        bobot = st.number_input(f"Bobot K{i+1}", min_value=0.0, value=1.0)
-    with c3:
-        tipe = st.selectbox(f"Tipe K{i+1}", ["Benefit", "Cost"])
+    st.sidebar.markdown(f"**Kriteria {i+1}**")
+    nama = st.sidebar.text_input(f"Nama Kriteria {i+1}", value=f"C{i+1}")
+    bobot = st.sidebar.number_input(f"Bobot K{i+1}", value=1.0)
+    tipe = st.sidebar.selectbox(f"Tipe K{i+1}", ["Benefit", "Cost"])
 
     kriteria_names.append(nama)
     weights.append(bobot)
     impacts.append(tipe)
 
-
-# ============================================================
-# Input Alternatif & Nilai Matriks
-# ============================================================
-st.subheader("📋 Input Alternatif & Nilai Matriks Keputusan")
+# ─────────────────────────────────────────────
+# Input Alternatif & Nilai Matrix
+# ─────────────────────────────────────────────
+st.sidebar.subheader("📋 Input Alternatif")
 
 data = {}
 alt_names = []
 
 for a in range(jml_alternatif):
-    st.markdown(f"### ➤ Alternatif {a+1}")
-    alt_name = st.text_input(f"Nama Alternatif {a+1}", value=f"A{a+1}")
+    st.sidebar.markdown(f"**Alternatif {a+1}**")
+    alt_name = st.sidebar.text_input(f"Nama Alternatif {a+1}", value=f"A{a+1}")
     alt_names.append(alt_name)
 
     nilai_alt = []
-    c_cols = st.columns(jml_kriteria)
-
     for k in range(jml_kriteria):
-        nilai = c_cols[k].number_input(f"{kriteria_names[k]} ({alt_name})", value=0.0)
+        nilai = st.sidebar.number_input(f"{kriteria_names[k]} ({alt_name})", value=0.0)
         nilai_alt.append(nilai)
 
     data[alt_name] = nilai_alt
 
+# Membuat DataFrame
 df = pd.DataFrame(data, index=kriteria_names).T
+
 st.write("### 📊 Matriks Keputusan")
 st.dataframe(df)
 
-# ============================================================
-# Lambda Fixed = 0.50
-# ============================================================
+# Lambda fixed
 lamb = 0.5
 
 # ============================================================
-# Tombol Hitung
+# TOMBOL HITUNG
 # ============================================================
 if st.button("🚀 Hitung WASPAS"):
     result = waspas(df, weights, impacts, lamb)
@@ -194,9 +181,9 @@ if st.button("🚀 Hitung WASPAS"):
 
     winners = result[result["Rank"] == 1].index.tolist()
 
-    st.success("Hasil perhitungan bonus berdasarkan nilai Q_WASPAS telah ditampilkan pada tabel.")
+    st.success("Perhitungan selesai! Bonus ditentukan berdasarkan nilai WASPAS.")
 
-    # === PDF ===
+    # PDF
     pdf_file = generate_pdf(result, winners)
 
     st.download_button(
